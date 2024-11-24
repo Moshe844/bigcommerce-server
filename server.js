@@ -1,24 +1,24 @@
 import express from 'express';
 import fetch from 'node-fetch';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.static('src'));
 
-// Payment processing route
-app.post('/process-payment', async (req, res) => {
-    const { cardNumber, cardExp, cardCvv, amount } = req.body;
-
-    console.log('Received Payment Data:', { cardNumber, cardExp, cardCvv, amount }); // Debug log
+// Endpoint to process payment requests
+app.post('/api/payment', async (req, res) => {
+    const { cardNumber, cardExp, cardCvv, amount, orderId } = req.body;
 
     if (!amount || isNaN(amount)) {
-        return res.status(400).json({ success: false, message: 'Amount Required' });
+        return res.status(400).json({ success: false, message: 'Amount is required' });
     }
 
     const payload = {
-        xKey: 'cardktestaccoudev7973ce78b7584012a3ad439b1d65', // Replace with your Cardknox API key
+        xKey: process.env.CARDKNOX_API_KEY, // Ensure your API key is stored securely
         xVersion: '5.0.0',
         xSoftwareName: 'BigCommerceIntegration',
         xSoftwareVersion: '1.0',
@@ -27,9 +27,11 @@ app.post('/process-payment', async (req, res) => {
         xExp: cardExp,
         xCVV: cardCvv,
         xAmount: amount,
+        xOrderId: orderId,
     };
 
     try {
+        // Send payment request to Cardknox
         const response = await fetch('https://x1.cardknox.com/gatewayjson', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -39,17 +41,19 @@ app.post('/process-payment', async (req, res) => {
         const result = await response.json();
 
         if (result.xResult === 'A') {
+            // Payment Approved
             res.status(200).json({ success: true, transactionId: result.xRefNum });
         } else {
+            // Payment Declined
             res.status(400).json({ success: false, message: result.xError });
         }
     } catch (error) {
-        console.error('Error interacting with Cardknox:', error);
-        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+        console.error('Error processing payment:', error);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
     }
 });
 
-
+// Start the server
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });
