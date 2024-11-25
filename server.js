@@ -18,7 +18,7 @@ app.post('/api/payment', async (req, res) => {
     }
 
     const payload = {
-        xKey: process.env.CARDKNOX_API_KEY, // Ensure your API key is stored securely
+        xKey: process.env.CARDKNOX_API_KEY, // Your Cardknox API key
         xVersion: '5.0.0',
         xSoftwareName: 'BigCommerceIntegration',
         xSoftwareVersion: '1.0',
