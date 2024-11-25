@@ -26,7 +26,7 @@ app.post('/api/payment', async (req, res) => {
         xCardNum: cardNumber,
         xExp: cardExp,
         xCVV: cardCvv,
-        xAmount: amount,
+        xAmount: amount.toFixed(2),
         xOrderId: orderId,
     };
 
