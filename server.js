@@ -11,7 +11,6 @@ app.use(express.json());  // Middleware to parse incoming JSON requests
 
 // Middleware to log the raw request body (for debugging purposes)
 app.use((req, res, next) => {
-    console.log('Request Headers:', req.headers);  // Log headers
     console.log('Request Body:', req.body);  // Log the raw request body
     next();
 });
@@ -24,7 +23,6 @@ app.post('/api/payment', async (req, res) => {
 
     // Validate if amount is missing or invalid
     if (!amount || isNaN(amount)) {
-        console.log('Amount is missing or invalid:', amount);  // Log invalid amount
         return res.status(400).json({ success: false, message: 'Amount is required' });
     }
 
